@@ -1,0 +1,4 @@
+1.An option to go to the search page.
+
+
+2.Function to get Date, Item, Label, and Spending Range
