@@ -1,15 +1,31 @@
-1.新增資料: insertData(Year, Month, Date, Time, Name, Price)，回傳資料編號Data_No(int)
+內部要求:
+1.使用第一個list儲存所有insertData資料
+
+2.使用第二個list儲存所有insertTag資料
+
+3.使用額外判斷檢查輸入格式
+  checkYear(Year):檢查年份是否為四位數
+  checkMonth(Month):檢查月份是否為1~12
+  checkDate(Date):檢查日期是否符合月份日數
+  checkTime(Time):檢查時間是否合理
+  checkName(Name):檢查名稱是否符合命名規則
+  checkPrice(Price):檢查價格是否有填寫
+
+外部要求:
+1.檔案名稱: database.py
+
+2.新增資料: insertData(Year, Month, Date, Time, Name, Price)，回傳資料編號Data_No(int)，回傳0代表新增失敗
   Year: INT NOT NULL (e.g. 2024)
   Month: INT NOT NULL (e.g. 02, 11)
   Date: INT NOT NULL (e.g. 01, 31)
   Time: INT NOT NULL (from 00:00 to 23:59)(e.g. 1055 for 10:55, 2048 for 20:48)
-  Name: VARCHAR(20) NOT NULL (1~20 chars)
+  Name: VARCHAR(20) NOT NULL (1~20 chars)(only a~z A~Z 0~9)
   Price: INT NOT NULL
 
-2.為現有資料增加標籤: insertTag(Data_No, Tag)，新增成功回傳1，失敗回傳0
+3.為現有資料增加標籤: insertTag(Data_No, Tag)，新增成功回傳1，失敗回傳0
   Data_No: data number from "insertData"
   Tag: VARCHAR(20) NOT NULL (1~20 chars)
 
-3.取得資料使用 getAllData()，回傳一個list包含所有消費紀錄的(Year, Month, Date, Time, Name, Price)
+4.取得資料使用 getAllData()，回傳一個list包含所有消費紀錄的(Year, Month, Date, Time, Name, Price)
 
-4.取得特定消費紀錄之使用 getTag(Data_No)，以list回傳此資料所有的Tag名稱(string)
+5.取得特定消費紀錄之使用 getTag(Data_No)，以list回傳此資料所有的Tag名稱(string)
