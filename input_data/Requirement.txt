@@ -1,14 +1,17 @@
 內部要求:
 1. 使用者輸入提示文字
    print
+
 2. 輸入資料
    input: 使用者逐項輸入該品項的資料 (Year, Month, Date, Time, Name, Price)
    將資料儲存至 database.py 的第一個 list（insertData）。
+
 3. 標籤
    使用 insertData 回傳的 Data_No (int) 進行下一步操作。
    若回傳的是有效的資料編號 (Data_No)，列出有效標籤（預設標籤及insertTag的資料），請選擇標籤（目前不支援自訂標籤）。
        將 Tag 與 Data_No 回傳至資料庫。
    若回傳 0，表示新增失敗，請重新填寫，回到1.。
+
 4.判斷/檢查輸入格式
   checkYear(Year):檢查年份是否為四位數
   checkMonth(Month):檢查月份是否為1~12
