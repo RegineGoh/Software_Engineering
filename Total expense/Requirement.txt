@@ -1,6 +1,0 @@
-1. getExpenseFromDateRange(int YearA, int MonthA, int DateA, int YearB, int MonthB, int DateB, bool detail, bool chart)
-* 取得從日期 A 到日期 B 之間的總消費以及各標籤佔比
-* 日期 A 預設為資料中最早的日期，日期 B 預設為資料中最晚的日期
-* detail == True 則輸出所有消費細項，預設為 False
-* chart == True 則輸出圓餅圖，預設為 False
-
