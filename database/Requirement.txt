@@ -20,4 +20,4 @@
 
 4.取得完整資料庫: getAllData()，回傳一個list包含所有消費紀錄的(Year, Month, Date, Time, Name, Price)
 
-5.取得特定消費紀錄之標籤: getTag(Data_No)，以list回傳此資料所有的Tag名稱(string)
+5.取得特定消費紀錄之標籤: getAllTag(Tag)，以list回傳所有使用到此Tag名稱(string)的資料編號
