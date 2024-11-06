@@ -9,6 +9,14 @@
    若回傳的是有效的資料編號 (Data_No)，列出有效標籤（預設標籤及insertTag的資料），請選擇標籤（目前不支援自訂標籤）。
        將 Tag 與 Data_No 回傳至資料庫。
    若回傳 0，表示新增失敗，請重新填寫，回到1.。
+4.判斷/檢查輸入格式
+  checkYear(Year):檢查年份是否為四位數
+  checkMonth(Month):檢查月份是否為1~12
+  checkDate(Date):檢查日期是否符合月份日數
+  checkTime(Time):檢查時間是否合理
+  checkName(Name):檢查名稱是否符合命名規則
+  checkPrice(Price):檢查價格是否有填寫
+  checkPrice(Tag):檢查標籤是否有效
 
 外部要求:
 1. 檔案名稱： inputData.py
