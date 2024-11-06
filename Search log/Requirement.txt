@@ -1,4 +1,32 @@
-1.An option to go to the search page.
+內部需求:
+import database.py
+getAllData()
+getAllTag()
 
+Function:
+getYear()
 
-2.Function to get Date, Item, Label, and Spending Range
+searchDate(int year, int month, int date)
+searchMonth(int year, int month)
+searchTag(sting name)
+searchItem(string name)
+searchAmount(int value)
+searchRange(int min, int max)
+
+showResult()
+
+外部需求:
+name:search.py
+
+顯示:
+Date: (select year)
+      (input month)
+      (input date)
+Tag:  (select tag)
+Item: (input item)
+Money:(input value/min) ~ (input max/empty)
+(Search button)
+
+顯示結果:
+list
+(Year, Month, Date, Time, Name, Price, tag)
