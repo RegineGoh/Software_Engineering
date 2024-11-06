@@ -3,14 +3,6 @@
 
 2.使用第二個list儲存所有insertTag資料
 
-3.使用額外判斷檢查輸入格式
-  checkYear(Year):檢查年份是否為四位數
-  checkMonth(Month):檢查月份是否為1~12
-  checkDate(Date):檢查日期是否符合月份日數
-  checkTime(Time):檢查時間是否合理
-  checkName(Name):檢查名稱是否符合命名規則
-  checkPrice(Price):檢查價格是否有填寫
-
 外部要求:
 1.檔案名稱: database.py
 
