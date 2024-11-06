@@ -1,25 +1,15 @@
-1.For insert, call insertData(Year, Month, Date, Time, Name, Price), return data No.
+1.新增資料: insertData(Year, Month, Date, Time, Name, Price)，回傳資料編號Data_No(int)
+  Year: INT NOT NULL (e.g. 2024)
+  Month: INT NOT NULL (e.g. 02, 11)
+  Date: INT NOT NULL (e.g. 01, 31)
+  Time: INT NOT NULL (from 00:00 to 23:59)(e.g. 1055 for 10:55, 2048 for 20:48)
+  Name: VARCHAR(20) NOT NULL (1~20 chars)
+  Price: INT NOT NULL
 
-Year: INT NOT NULL (e.g. 2024)
-Month: INT NOT NULL (e.g. 02, 11)
-Date: INT NOT NULL (e.g. 01, 31)
-Time: INT NOT NULL (from 00:00 to 23:59)(e.g. 1055 for 10:55, 2048 for 20:48)
-Name: VARCHAR(20) NOT NULL (1~20 chars)
-Price: INT NOT NULL
+2.為現有資料增加標籤: insertTag(Data_No, Tag)，新增成功回傳1，失敗回傳0
+  Data_No: data number from "insertData"
+  Tag: VARCHAR(20) NOT NULL (1~20 chars)
 
-Add tags, call insertTag(Number, Tag), return 1 for success.
+3.取得資料使用 getAllData()，回傳一個list包含所有消費紀錄的(Year, Month, Date, Time, Name, Price)
 
-Number: data number from "insertData"
-Tag: VARCHAR(20) NOT NULL (1~20 chars)
-
-2.For searching, call
-
-searchYear(Year, mode) (mode can be GT, EQ, LT)(>, =, <)
-searchMonth(Month, mode)
-searchDate(Date, mode)
-searchTime(Time, mode)
-searchName(Name)
-searchPrice(Price, mode)
-searchNo(No, mode)
-
-Return a list of item's all data.
+4.取得特定消費紀錄之使用 getTag(Data_No)，以list回傳此資料所有的Tag名稱(string)
