@@ -19,14 +19,13 @@ showResult()
 name:search.py
 
 顯示:
-Date: (select year)
-      (input month)
-      (input date)
-Tag:  (select tag)
-Item: (input item)
+Date: Year: (select year)
+      Month:(input month)
+      Date: (input date)
+Tag:  (   select tag   )
+Item: (   input item    )
 Money:(input value/min) ~ (input max/empty)
-(Search button)
+                            (Search button)
 
 顯示結果:
-list
 (Year, Month, Date, Time, Name, Price, tag)
