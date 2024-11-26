@@ -15,9 +15,9 @@ max=-1
 data=getAllData()
 
 def getYear():
-    allYear=[]
+    allYear=()
     for row in data:
-        allYear.append(row[0])
+        allYear.add(row[0])
     return allYear
 
 def searchDate(year, month, date):
@@ -49,7 +49,7 @@ def searchAmount(value):
 def searchRange(min, max):
     newData=[]
     for row in data:
-        if(row[5]>=min and row[5]<=max):
+        if(min<=row[5]<=max):
             newData.append(row)
     data[:]=newData
 
@@ -58,28 +58,27 @@ def showResult():
     reslutWindow.title("Result")
 
     headers = ["Year", "Month", "Date", "Time", "Name", "Price"]
-    widths = [6, 5, 6, 5, 20, 7]  # Widths for each column
+    widths = [6, 5, 6, 5, 20, 7]
 
     for col, (header, width) in enumerate(zip(headers, widths)):
         header_label = Label(reslutWindow, text=header, font=("Courier New", 10, "bold"), width=width, anchor="center", bg="lightblue")
         header_label.grid(row=0, column=col, padx=0, pady=0, sticky="nsew")
 
-    # Loop through the data and display it in the grid
-    for row_idx, row in enumerate(data, start=2):  # Start from row 2, right after the separator
-        # Alternate row colors: white for even, lightblue for odd rows
+    #data output, background color: odd-lightblue, even-white
+    for row_idx, row in enumerate(data, start=2):
         row_color = "white" if row_idx % 2 == 0 else "lightblue"
         
         for col_idx, (value, width) in enumerate(zip(row, widths)):
-            # Format price to 2 decimal places
+            #if the value is float, choose to the second charactor after point
             if isinstance(value, float):
                 value = f"{value:.2f}"
             row_label = Label(reslutWindow, text=value, font=("Courier New", 10), width=width, anchor="center", bg=row_color)
-            row_label.grid(row=row_idx, column=col_idx, padx=0, pady=0, sticky="nsew")  # No padding, sticky to fill the cell
+            row_label.grid(row=row_idx, column=col_idx, padx=0, pady=0, sticky="nsew") #sticky:full, no space to eachother
 
-    # Make the columns and rows expand to fill available space
+    #let the table size change with the window
     for col in range(6):
         reslutWindow.grid_columnconfigure(col, weight=1)
-    for row in range(len(data) + 2):  # Add 2 for the header and separator
+    for row in range(len(data) + 2):
         reslutWindow.grid_rowconfigure(row, weight=1)
 
     reslutWindow.mainloop()
@@ -88,11 +87,25 @@ def search():
     if(yearBox.current()>=0):
         year=yearBox.get()
         month=monthBox.get(1.0, 'end-1c')
+        if(1<=month<=12):
+            errorWindow()
+            data[:]=getAllData()
+            return
         date=dateBox.get(1.0, 'end-1c')
-        if(date!=0):
-            searchDate(year, month, date)
+        endDate=0;
+        if(month==1 or month==3 or month==5 or month==7 or month==8 or month==10 or month==12):
+            endDate=31
+        elif(month==2):
+            if(year%4==0):
+                endDate=29
+            else:
+                endDate=28
+        elif(month==4 or month==6 or month==9 or month==11):
+            endDate=30
+        if(1<=date<=endDate):
+            searchDate(year,month,date)
         else:
-            searchMonth(year, month)
+            searchMonth(year,month)
     if(tagBox.current()>=0):
         tag=tagBox.get()
         searchTag()
@@ -107,6 +120,13 @@ def search():
         else:
             searchRange(valueOrMin, max)
     showResult()
+    data[:]=getAllData()
+
+def errorWindow():
+    errorWindow=Tk()
+    window.title("Error")
+    Label(errorWindow, text="Input unvalid!\nPlease check your input!").grid(padx=10,pady=5)
+    errorWindow.mainloop()
     
 window=Tk()
 window.title("Search")
