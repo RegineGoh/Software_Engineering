@@ -1,0 +1,38 @@
+檔案名稱：database.py
+class名稱：Database
+
+可使用的functions：
+1. insertData：新增一筆資料，回傳資料編號 (Data_No)
+2. insertTag：為資料新增標籤，避免重複標籤
+3. getAllData：取得所有資料
+4. getAllTag：取得使用特定標籤的資料編號
+5. getTagsByDataNo：取得特定資料編號的所有標籤
+6. tagExists：檢查特定資料下是否已有某標籤
+7. findSimilarTags：查找與輸入標籤相似的現有標籤
+
+以下為使用範例：
+from database import Database
+
+# 初始化資料庫
+db = Database()
+
+# 新增資料
+data_no1 = db.insertData(2024, 11, 26, 1230, "ItemA", 100)
+data_no2 = db.insertData(2024, 11, 27, 1415, "ItemB", 200)
+
+# 新增標籤
+db.insertTag(data_no1, "Electronics")
+db.insertTag(data_no1, "Gadgets")
+db.insertTag(data_no2, "Books")
+
+# 查詢所有資料
+print("所有資料:", db.getAllData())
+
+# 查詢特定資料的標籤
+print("資料編號", data_no1, "的標籤:", db.getTagsByDataNo(data_no1))
+
+# 判斷特定標籤是否存在
+print("標籤 'Electronics' 是否存在於資料編號", data_no1, ":", db.tagExists(data_no1, "Electronics"))
+
+# 查詢相似標籤
+print("與 'Gadget' 相似的標籤:", db.findSimilarTags("Gadget"))
