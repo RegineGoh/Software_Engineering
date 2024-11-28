@@ -1,6 +1,6 @@
 from tkinter import *
 from tkinter import ttk
-import database
+#from database import Database
 
 class SearchWindow:
     def __init__(self):
@@ -11,8 +11,20 @@ class SearchWindow:
         self.name = ""
         self.valueOrMin = -1
         self.max = -1
+       # database=Database()
 
-        self.data = database.getAllData()
+        #self.data = database.getAllData()
+        self.data=[[2023, 3, 19, '10:23', 'Item A', 45.67],
+ [2022, 6, 5, '15:42', 'Item B', 61.39],
+ [2024, 1, 14, '08:09', 'Item C', 77.85],
+ [2021, 9, 21, '20:04', 'Item D', 56.12],
+ [2022, 11, 7, '12:01', 'Item E', 36.78],
+ [2024, 2, 2, '07:56', 'Item B', 95.23],
+ [2023, 8, 25, '03:12', 'Item D', 19.67],
+ [2021, 4, 13, '09:53', 'Item A', 24.89],
+ [2020, 10, 17, '18:17', 'Item C', 12.98],
+ [2024, 12, 28, '22:38', 'Item E', 52.31]]
+
         self.init_ui()
 
     def get_years(self):
@@ -26,7 +38,8 @@ class SearchWindow:
         self.data = [row for row in self.data if row[0] == year and row[1] == month]
 
     def search_tag(self, tag):
-        self.data = database.getAllTag(tag)
+        #self.data = database.getAllTag(tag)
+        self.data=(1,2,3)
 
     def search_item(self, name):
         self.data = [row for row in self.data if row[4] == name]
@@ -60,14 +73,12 @@ class SearchWindow:
         result_window.mainloop()
 
     def search(self):
-        self.data = database.getAllData()  # Reset data for each search
-
         if self.yearBox.current() >= 0:
             year = int(self.yearBox.get())
             month = int(self.monthBox.get(1.0, 'end-1c'))
             if not (1 <= month <= 12):
                 self.error_window()
-                self.data = database.getAllData()
+                #self.data = database.getAllData()
                 return
             date = int(self.dateBox.get(1.0, 'end-1c'))
             if 1 <= date <= 31:  # Simplified; adjust based on month
@@ -94,7 +105,7 @@ class SearchWindow:
                 self.search_amount(min_val)
 
         self.show_result()
-        self.data = database.getAllData()
+        #self.data = database.getAllData()
         
     def error_window(self):
         error_window = Tk()
@@ -124,7 +135,7 @@ class SearchWindow:
         self.dateBox = Text(window, height=1, width=3)
         self.dateBox.grid(row=2, column=2, padx=10, pady=5, sticky="w")
 
-        self.tagBox = ttk.Combobox(window, values=database.getAllTag())
+        self.tagBox = ttk.Combobox(window, values=[1,2,3], width=8)
         self.tagBox.grid(row=3, column=2, padx=10, pady=5, sticky="w")
 
         self.itemBox = Text(window, height=1, width=21)
