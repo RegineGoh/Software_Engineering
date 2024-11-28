@@ -73,15 +73,15 @@ class SearchWindow:
         result_window.mainloop()
 
     def search(self):
+        #self.data = database.getAllData()
         if self.yearBox.current() >= 0:
             year = int(self.yearBox.get())
-            month = int(self.monthBox.get(1.0, 'end-1c'))
+            month = int(self.monthBox.get().strip())
             if not (1 <= month <= 12):
                 self.error_window()
-                #self.data = database.getAllData()
                 return
-            date = int(self.dateBox.get(1.0, 'end-1c'))
-            if 1 <= date <= 31:  # Simplified; adjust based on month
+            date = int(self.dateBox.get().strip()) if self.dateBox.get().strip() != "" else None
+            if (date==""):
                 self.search_date(year, month, date)
             else:
                 self.search_month(year, month)
@@ -94,18 +94,15 @@ class SearchWindow:
         if name:
             self.search_item(name)
 
-        min_val = self.minBox.get(1.0, 'end-1c').strip()
-        max_val = self.maxBox.get(1.0, 'end-1c').strip()
-        if min_val:
-            min_val = float(min_val)
-            if max_val:
-                max_val = float(max_val)
-                self.search_range(min_val, max_val)
+        min_val = float(self.minBox.get().strip()) if self.minBox.get().strip() != "" else None
+        max_val = float(self.maxBox.get().strip()) if self.maxBox.get().strip() != "" else None
+        if min_val is not None:
+            if max_val is not None:
+                self.search_range(min_val, max_val)  # Search with both min and max
             else:
-                self.search_amount(min_val)
+                self.search_amount(min_val)  # Search with min only
 
         self.show_result()
-        #self.data = database.getAllData()
         
     def error_window(self):
         error_window = Tk()
@@ -129,10 +126,10 @@ class SearchWindow:
         self.yearBox = ttk.Combobox(window, values=self.get_years(), width=5)
         self.yearBox.grid(row=0, column=2, padx=10, pady=5, sticky="w")
 
-        self.monthBox = Text(window, height=1, width=3)
+        self.monthBox = Entry(window, width=3)
         self.monthBox.grid(row=1, column=2, padx=10, pady=5, sticky="w")
 
-        self.dateBox = Text(window, height=1, width=3)
+        self.dateBox = Entry(window, width=3)
         self.dateBox.grid(row=2, column=2, padx=10, pady=5, sticky="w")
 
         self.tagBox = ttk.Combobox(window, values=[1,2,3], width=8)
@@ -141,10 +138,10 @@ class SearchWindow:
         self.itemBox = Text(window, height=1, width=21)
         self.itemBox.grid(row=4, column=1, columnspan=2, padx=10, pady=5, sticky="w")
 
-        self.minBox = Text(window, height=1, width=8)
+        self.minBox = Entry(window, width=8)
         self.minBox.grid(row=5, column=1, padx=10, pady=5, sticky="w")
         Label(window, text="~").grid(row=5, column=2, padx=1, pady=2, sticky="w")
-        self.maxBox = Text(window, height=1, width=8)
+        self.maxBox = Entry(window, width=8)
         self.maxBox.grid(row=5, column=2, padx=10, pady=5, sticky="e")
 
         btn = Button(window, text='Search', command=self.search)
