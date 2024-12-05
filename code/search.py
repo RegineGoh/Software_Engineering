@@ -2,42 +2,44 @@ from tkinter import *
 from tkinter import ttk
 from database import Database
 
+database=Database()
+
 class SearchWindow:
     def __init__(self):
-        database=Database()
-
         self.year = -1
         self.month = 0
         self.date = 0
-        self.tag = -1
+        self.tag = database.getTagName()
         self.name = ""
         self.valueOrMin = -1
         self.max = -1
         self.data = database.getAllData()
         self.init_ui()
 
+        database.insertData(2024, 8, 30, 1222, "lunch", 130)
+
+
     def get_years(self):
-        years = set(row[0] for row in self.data)
+        years = set(row["Year"] for row in self.data)
         return list(years)
 
     def search_date(self, year, month, date):
-        self.data = [row for row in self.data if row[0] == year and row[1] == month and row[2] == date]
+        self.data = [row for row in self.data if row["Year"] == year and row["Month"] == month and row["Date"] == date]
 
     def search_month(self, year, month):
-        self.data = [row for row in self.data if row[0] == year and row[1] == month]
+        self.data = [row for row in self.data if row["Year"] == year and row["Month"] == month]
 
     def search_tag(self, tag):
-        #self.data = database.getAllTag(tag)
-        self.data=(1,2,3)
+        self.data = [row for row in self.data if row["Data_No"] == database.getAllTag(tag)]
 
     def search_item(self, name):
-        self.data = [row for row in self.data if row[4] == name]
+        self.data = [row for row in self.data if row["Name"] == name]
 
     def search_amount(self, value):
-        self.data = [row for row in self.data if row[5] == value]
+        self.data = [row for row in self.data if row["Price"] == value]
 
     def search_range(self, min_val, max_val):
-        self.data = [row for row in self.data if min_val <= row[5] <= max_val]
+        self.data = [row for row in self.data if min_val <= row["Price"] <= max_val]
 
     def show_result(self):
         result_window = Tk()
@@ -62,7 +64,7 @@ class SearchWindow:
         result_window.mainloop()
 
     def search(self):
-        #self.data = database.getAllData()
+        self.data = database.getAllData()
         if self.yearBox.current() >= 0:
             year = int(self.yearBox.get())
             month = int(self.monthBox.get().strip())
@@ -121,7 +123,7 @@ class SearchWindow:
         self.dateBox = Entry(window, width=3)
         self.dateBox.grid(row=2, column=2, padx=10, pady=5, sticky="w")
 
-        self.tagBox = ttk.Combobox(window, values=[1,2,3], width=8)
+        self.tagBox = ttk.Combobox(window, values=self.tag, width=8)
         self.tagBox.grid(row=3, column=2, padx=10, pady=5, sticky="w")
 
         self.itemBox = Text(window, height=1, width=21)

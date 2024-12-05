@@ -74,3 +74,8 @@ class Database:
         tag1_lower = tag1.lower()
         tag2_lower = tag2.lower()
         return tag1_lower in tag2_lower or tag2_lower in tag1_lower
+    
+    def getTagName(self):
+        tag=set(tag["Tag"] for tag in self.tag_list)
+        return list(tag)
+
