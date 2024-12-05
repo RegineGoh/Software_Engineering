@@ -79,3 +79,10 @@ class Database:
         tag=set(tag["Tag"] for tag in self.tag_list)
         return list(tag)
 
+    def getTagData(self, Data_No):
+        return [
+            (data["Year"], data["Month"], data["Date"], data["Time"], data["Name"], data["Price"])
+            for data in self.data_list
+            for row in Data_No
+            if data["Data_No"] == row
+        ]

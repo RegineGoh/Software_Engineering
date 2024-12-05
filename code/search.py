@@ -3,6 +3,8 @@ from tkinter import ttk
 from database import Database
 
 database=Database()
+database.insertData(2024, 8, 30, 1222, "lunch", 130)
+database.insertTag(1,"food")
 
 class SearchWindow:
     def __init__(self):
@@ -16,36 +18,34 @@ class SearchWindow:
         self.data = database.getAllData()
         self.init_ui()
 
-        database.insertData(2024, 8, 30, 1222, "lunch", 130)
-
 
     def get_years(self):
-        years = set(row["Year"] for row in self.data)
+        years = set(row[0] for row in self.data)
         return list(years)
 
     def search_date(self, year, month, date):
-        self.data = [row for row in self.data if row["Year"] == year and row["Month"] == month and row["Date"] == date]
+        self.data = [row for row in self.data if row[0] == year and row[1] == month and row[2] == date]
 
     def search_month(self, year, month):
-        self.data = [row for row in self.data if row["Year"] == year and row["Month"] == month]
+        self.data = [row for row in self.data if row[0] == year and row[1] == month]
 
     def search_tag(self, tag):
-        self.data = [row for row in self.data if row["Data_No"] == database.getAllTag(tag)]
+        self.data = database.getTagData(database.getAllTag(tag))
 
     def search_item(self, name):
-        self.data = [row for row in self.data if row["Name"] == name]
+        self.data = [row for row in self.data if row[4] == name]
 
     def search_amount(self, value):
-        self.data = [row for row in self.data if row["Price"] == value]
+        self.data = [row for row in self.data if row[5] == value]
 
     def search_range(self, min_val, max_val):
-        self.data = [row for row in self.data if min_val <= row["Price"] <= max_val]
+        self.data = [row for row in self.data if min_val <= row[5] <= max_val]
 
     def show_result(self):
         result_window = Tk()
         result_window.title("Result")
 
-        headers = ["Year", "Month", "Date", "Time", "Name", "Price"]
+        headers = ["Year", "Month", "Date", "Time", "Item", "Price"]
         widths = [6, 5, 6, 5, 20, 7]
 
         for col, (header, width) in enumerate(zip(headers, widths)):
