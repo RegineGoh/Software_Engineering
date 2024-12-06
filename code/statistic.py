@@ -1,106 +1,159 @@
-from datetime import date
-from collections import Counter
+from tkinter import *
+from tkinter import messagebox
 import matplotlib.pyplot as plt
+from datetime import date
 
-def getStatistic(db, YearA, MonthA, DateA, YearB, MonthB, DateB, detail=False, chart=False):
-    # 獲取所有資料
-    all_data = [
-        {"Year": data[0], "Month": data[1], "Date": data[2], "Time": data[3], "Name": data[4], "Price": data[5], "Data_No": index + 1}
-        for index, data in enumerate(db.getAllData())
-    ]
+class StatisticWindow:
+    def __init__(self, database):
+        self.database = database
+        self.data = database.getAllData()
+        #self.tag = database.getAllTag()
+        self.init_ui()
 
-    # 驗證是否有資料
-    if not all_data:
-        print("無消費資料。")
-        return
+    def get_data_within_date_range(self, start_date, end_date):
+        return [row for row in self.data if start_date <= date(row[0], row[1], row[2]) <= end_date]
 
-    # 預設日期範圍
-    default_start = min(all_data, key=lambda x: (x["Year"], x["Month"], x["Date"]))
-    default_end = max(all_data, key=lambda x: (x["Year"], x["Month"], x["Date"]))
+    def show_detail(self, filtered_data):
+        detail_window = Toplevel()
+        detail_window.title("Statistic Detail")
 
-    # 驗證日期 A 和 B
-    try:
-        start_date = date(YearA, MonthA, DateA)
-    except ValueError:
-        print(f"日期 A ({YearA}-{MonthA}-{DateA}) 無效，使用最早日期 {default_start}.")
-        start_date = date(default_start["Year"], default_start["Month"], default_start["Date"])
+        headers = ["Year", "Month", "Date", "Time", "Item", "Price"]
+        widths = [6, 5, 6, 5, 20, 7]
 
-    try:
-        end_date = date(YearB, MonthB, DateB)
-    except ValueError:
-        print(f"日期 B ({YearB}-{MonthB}-{DateB}) 無效，使用最晚日期 {default_end}.")
-        end_date = date(default_end["Year"], default_end["Month"], default_end["Date"])
+        # 設置標題欄
+        for col, (header, width) in enumerate(zip(headers, widths)):
+            Label(detail_window, text=header, font=("Courier New", 10, "bold"), width=width, bg="lightblue").grid(row=0, column=col, sticky="nsew")
 
-    # 確保日期範圍有效
-    if start_date > end_date:
-        print("日期範圍錯誤，交換 A 與 B 的值。")
-        start_date, end_date = end_date, start_date
+        # 顯示資料
+        for row_idx, row in enumerate(filtered_data, start=1):
+            row_color = "white" if row_idx % 2 == 0 else "lightblue"
+            for col_idx, (value, width) in enumerate(zip(row, widths)):
+                if isinstance(value, float):
+                    value = f"{value:.2f}"
+                Label(detail_window, text=value, font=("Courier New", 10), width=width, bg=row_color).grid(row=row_idx, column=col_idx, sticky="nsew")
 
-    # 篩選符合範圍的資料
-    filtered_data = [
-        data for data in all_data
-        if start_date <= date(data["Year"], data["Month"], data["Date"]) <= end_date
-    ]
+        for col in range(len(headers)):
+            detail_window.grid_columnconfigure(col, weight=1)
 
-    if not filtered_data:
-        print("篩選後無消費資料。")
-        return
+    def show_chart(self, filtered_data):
+        # 使用 Counter 來統計每個標籤的總價格
+        tag_totals = {tag: 0 for tag in self.database.getTagName()}  # 初始化每個標籤的總價格為 0
 
-    # 計算總消費
-    total_expense = sum(data["Price"] for data in filtered_data)
+        # 遍歷所有資料
+        for data_no in range(1, len(self.database.data_list) + 1):  # 假設資料編號從 1 開始
+            # 獲取當前資料的所有標籤
+            tags = self.database.getTagsByDataNo(data_no)
 
-    # 計算標籤佔比
-    tag_counts = Counter(
-        tag
-        for data in filtered_data
-        for tag in db.getTagsByDataNo(data["Data_No"])
-    )
+            # 找到對應資料的價格
+            price = next((data["Price"] for data in self.database.data_list if data["Data_No"] == data_no), 0)
 
-    # 輸出統計資訊
-    print(f"日期範圍：{start_date} ~ {end_date}")
-    print(f"總消費：{total_expense} 元")
-    print("標籤佔比：")
-    for tag, count in tag_counts.items():
-        print(f"  {tag}: {count} 筆 ({(count / len(filtered_data) * 100):.2f}%)")
+            # 為每個標籤增加該資料的價格
+            for tag in tags:
+                tag_totals[tag] += price  # 累加標籤的總價格
+                
+        # 如果沒有標籤資料，顯示錯誤提示
+        if not tag_totals:
+            messagebox.showinfo("No Tags", "No tags found for the selected data.")
+            return
 
-    # 輸出消費細項
-    if detail:
-        print("\n消費細項：")
-        for data in filtered_data:
-            print(f"  日期: {data['Year']}-{data['Month']:02d}-{data['Date']:02d}, "
-                  f"時間: {data['Time']:04d}, 名稱: {data['Name']}, 價格: {data['Price']} 元")
-
-    # 輸出圓餅圖
-    if chart:
-        labels = list(tag_counts.keys())
-        sizes = list(tag_counts.values())
+        labels = list(tag_totals.keys())
+        sizes = list(tag_totals.values())
         colors = plt.cm.Paired(range(len(labels)))
 
+        # 顯示圓餅圖
         plt.figure(figsize=(8, 6))
         plt.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90, colors=colors)
-        plt.title("Statistic")
+        plt.title("Tags Distribution")
         plt.axis('equal')  # 圓形比例
         plt.show()
 
+    def search(self):
+        # 取得開始日期
+        try:
+            start_year = int(self.start_year.get())
+            start_month = int(self.start_month.get())
+            start_day = int(self.start_day.get())
+            start_date = date(start_year, start_month, start_day)
+        except ValueError:
+            # 當日期格式錯誤時，設置為最早的日期
+            messagebox.showerror("Input Error", "Invalid start date. Setting to the earliest available date.")
+            start_date = min(date(row[0], row[1], row[2]) for row in self.data)  # 設定最早的日期
+
+        # 取得結束日期
+        try:
+            end_year = int(self.end_year.get())
+            end_month = int(self.end_month.get())
+            end_day = int(self.end_day.get())
+            end_date = date(end_year, end_month, end_day)
+        except ValueError:
+            # 當日期格式錯誤時，設置為最晚的日期
+            messagebox.showerror("Input Error", "Invalid end date. Setting to the latest available date.")
+            end_date = max(date(row[0], row[1], row[2]) for row in self.data)  # 設定最晚的日期
+
+        # 篩選資料
+        filtered_data = self.get_data_within_date_range(start_date, end_date)
+
+        if len(filtered_data) == 0:
+            messagebox.showinfo("No Data", "No data found for the given date range.")
+            return
+
+        if self.detail_var.get():
+            self.show_detail(filtered_data)
+
+        if self.chart_var.get():
+            self.show_chart(filtered_data)
+
+    def init_ui(self):
+        window = Tk()
+        window.title("Statistic Search")
+        # window.geometry("600x400")  # 設定視窗大小為 600x400
+
+        Label(window, text="Start Date:").grid(row=0, column=0, padx=10, pady=5, sticky="w")
+        Label(window, text="Year:").grid(row=0, column=1, padx=10, pady=5, sticky="w")
+        Label(window, text="Month:").grid(row=1, column=1, padx=10, pady=5, sticky="w")
+        Label(window, text="Date:").grid(row=2, column=1, padx=10, pady=5, sticky="w")
+
+        self.start_year = Entry(window, width=5)
+        self.start_year.grid(row=0, column=2, padx=10, pady=5, sticky="w")
+        self.start_month = Entry(window, width=5)
+        self.start_month.grid(row=1, column=2, padx=10, pady=5, sticky="w")
+        self.start_day = Entry(window, width=5)
+        self.start_day.grid(row=2, column=2, padx=10, pady=5, sticky="w")
+
+        # 設定結束日期輸入
+        Label(window, text="End Date:").grid(row=3, column=0, padx=10, pady=5, sticky="w")
+        Label(window, text="Year:").grid(row=3, column=1, padx=10, pady=5, sticky="w")
+        Label(window, text="Month:").grid(row=4, column=1, padx=10, pady=5, sticky="w")
+        Label(window, text="Day:").grid(row=5, column=1, padx=10, pady=5, sticky="w")
+
+        self.end_year = Entry(window, width=5)
+        self.end_year.grid(row=3, column=2, padx=10, pady=5, sticky="w")
+        self.end_month = Entry(window, width=5)
+        self.end_month.grid(row=4, column=2, padx=10, pady=5, sticky="w")
+        self.end_day = Entry(window, width=5)
+        self.end_day.grid(row=5, column=2, padx=10, pady=5, sticky="w")
+
+        # 勾選框：顯示細節與圖表
+        self.detail_var = BooleanVar()
+        self.chart_var = BooleanVar()
+
+        Checkbutton(window, text="Show Detail", variable=self.detail_var).grid(row=6, column=0, padx=10, pady=5, sticky="w")
+        Checkbutton(window, text="Show Chart", variable=self.chart_var).grid(row=7, column=0, padx=10, pady=5, sticky="w")
+
+        # 按鈕：搜尋並顯示結果
+        search_btn = Button(window, text="Get statistic", command=self.search)
+        search_btn.grid(row=8, column=0, columnspan=2, pady=10)
+
+        window.mainloop()
 
 
-
-""""
-測試 statistic: 
-
-from database import Database
-from statistic import getStatistic
-
-if __name__ == "__main__":
-    from database import Database
-    db = Database()
-    db.insertData(2022, 11, 1, 1200, "Lunch", 100)
-    db.insertTag(1, "Food")
-    db.insertData(2023, 11, 2, 1400, "Taxi", 200)
-    db.insertTag(2, "Transport")
-    db.insertData(2023, 11, 3, 1800, "Dinner", 300)
-    db.insertTag(3, "Food")
-
-    print(db.getAllTag("Food"))
-    getStatistic(db, 2023, 11, 1, 2023, 11, 4, detail=True, chart=True)
-"""
+# # 測試：
+# from database import Database
+# database = Database()
+# database.insertData(2024, 8, 30, 1222, "Lunch", 130)
+# database.insertTag(1, "Food")
+# database.insertData(2024, 8, 31, 1422, "Dinner", 150)
+# database.insertTag(2, "Food")
+# database.insertData(2024, 9, 1, 1022, "Taxi", 200)
+# database.insertTag(3, "Transport")
+# app = StatisticWindow(database)
