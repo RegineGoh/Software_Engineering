@@ -6,27 +6,6 @@ from tkinter import ttk
 from tkinter import messagebox
 from database import Database
 
-# 模擬資料庫類別（如果未提供資料庫實現，可用以下類別測試）
-class Database:
-    def __init__(self):
-        self.data = []
-        self.tags = {}
-
-    def insertData(self, year, month, day, time, name, price):
-        new_data = (year, month, day, time, name, price)
-        self.data.append(new_data)
-        return len(self.data)  # 回傳資料 ID
-
-    def insertTag(self, data_id, tag):
-        self.tags.setdefault(data_id, []).append(tag)
-        return 1
-
-    def getTagName(self):
-        return ["Food", "Entertainment", "Transportation"]
-
-    def getAllData(self):
-        return self.data
-
 database = Database()
 
 class InputDataWindow:
