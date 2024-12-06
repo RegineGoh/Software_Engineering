@@ -1,89 +1,130 @@
-#目前可輸入品項 
-#防呆模式還未完善
-#無GUI，純文字介面
+# 有GUI介面
+# 可以輸入
 
-# 功能提示文字
-print("請輸入消費品項的年分、月份、日期、時間、品項名稱及消費金額")
-print("按 Enter 確認每項輸入，若要取消動作可直接結束程式")
+from tkinter import *
+from tkinter import ttk
+from tkinter import messagebox
+from database import Database
 
-# 功能函數
-def checkYear(year):
-    return isinstance(year, int) and 1000 <= year <= 9999
+# 模擬資料庫類別（如果未提供資料庫實現，可用以下類別測試）
+class Database:
+    def __init__(self):
+        self.data = []
+        self.tags = {}
 
-def checkMonth(month):
-    return isinstance(month, int) and 1 <= month <= 12
+    def insertData(self, year, month, day, time, name, price):
+        new_data = (year, month, day, time, name, price)
+        self.data.append(new_data)
+        return len(self.data)  # 回傳資料 ID
 
-def checkDate(year, month, day):
-    try:
-        from datetime import datetime
-        datetime(year, month, day)
-        return True
-    except ValueError:
-        return False
+    def insertTag(self, data_id, tag):
+        self.tags.setdefault(data_id, []).append(tag)
+        return 1
 
-def checkTime(time):
-    return isinstance(time, int) and 0 <= time <= 2359
+    def getTagName(self):
+        return ["Food", "Entertainment", "Transportation"]
 
-def checkName(name):
-    return isinstance(name, str) and 1 <= len(name) <= 20 and name.isalnum()
+    def getAllData(self):
+        return self.data
 
-def checkPrice(price):
-    return isinstance(price, int) and price > 0
+database = Database()
 
-# 開始輸入資料
-try:
-    year = int(input("年分: "))
-    if not checkYear(year):
-        raise ValueError("年份輸入有誤，請輸入有效的四位數年份。")
+class InputDataWindow:
+    def __init__(self):
+        self.init_ui()
 
-    month = int(input("月份: "))
-    if not checkMonth(month):
-        raise ValueError("月份輸入有誤，請輸入 1 到 12 的值。")
+    def init_ui(self):
+        # 主視窗
+        self.window = Tk()
+        self.window.title("Input Data")
+        self.window.geometry("400x500")
 
-    date = int(input("日期: "))
-    if not checkDate(year, month, date):
-        raise ValueError("日期輸入有誤，請確認日期是否合法。")
+        # 標籤與輸入欄位
+        Label(self.window, text="Year:").grid(row=0, column=0, padx=10, pady=5, sticky="w")
+        self.yearBox = Entry(self.window, width=10)
+        self.yearBox.grid(row=0, column=1, padx=10, pady=5, sticky="w")
 
-    time = int(input("時間 (格式: 0000 - 2359): "))
-    if not checkTime(time):
-        raise ValueError("時間輸入有誤，請確認格式為 0000 到 2359。")
+        Label(self.window, text="Month:").grid(row=1, column=0, padx=10, pady=5, sticky="w")
+        self.monthBox = Entry(self.window, width=10)
+        self.monthBox.grid(row=1, column=1, padx=10, pady=5, sticky="w")
 
-    while True:
-        # 輸入單一品項
-        name = input("品項名稱: ")
-        if not checkName(name):
-            raise ValueError("名稱輸入有誤，請輸入長度為 1~20 的字母或數字。")
+        Label(self.window, text="Date:").grid(row=2, column=0, padx=10, pady=5, sticky="w")
+        self.dateBox = Entry(self.window, width=10)
+        self.dateBox.grid(row=2, column=1, padx=10, pady=5, sticky="w")
 
-        price = int(input("消費金額: "))
-        if not checkPrice(price):
-            raise ValueError("金額輸入有誤，請輸入大於 0 的正整數。")
+        Label(self.window, text="Time (0000~2359):").grid(row=3, column=0, padx=10, pady=5, sticky="w")
+        self.timeBox = Entry(self.window, width=10)
+        self.timeBox.grid(row=3, column=1, padx=10, pady=5, sticky="w")
 
-        # 新增資料到資料庫
-        # data_no = db.insertData(year, month, date, time, name, price)
-        data_no = 1  # 假設資料成功新增並回傳資料編號 1
-        if data_no == 0:
-            print("資料新增失敗，請重新輸入資料。")
-        else:
-            print(f"資料新增成功，資料編號為 {data_no}。")
-            print("請選擇標籤：")
-            # tags = db.getTagsByDataNo(data_no)  # 列出現有標籤
-            tags = ["食物", "娛樂", "交通"]  # 假設標籤範例
-            if tags:
-                print("可用標籤:", tags)
-            tag = input("標籤名稱: ")
-            # if db.insertTag(data_no, tag) == 1:
-            if tag:  # 假設標籤成功新增
-                print("標籤新增成功。")
-            else:
-                print("標籤新增失敗，請重新選擇。")
+        Label(self.window, text="Item Name:").grid(row=4, column=0, padx=10, pady=5, sticky="w")
+        self.itemBox = Entry(self.window, width=20)
+        self.itemBox.grid(row=4, column=1, padx=10, pady=5, sticky="w")
 
-        # 確認是否繼續輸入
-        cont = input("是否繼續輸入下一個品項？(y/n): ").lower()
-        if cont != 'y':
-            print("輸入完成，感謝使用！")
-            break
+        Label(self.window, text="Price:").grid(row=5, column=0, padx=10, pady=5, sticky="w")
+        self.priceBox = Entry(self.window, width=10)
+        self.priceBox.grid(row=5, column=1, padx=10, pady=5, sticky="w")
 
-except ValueError as e:
-    print(f"輸入錯誤: {e}")
-except Exception as e:
-    print(f"發生未知錯誤: {e}")
+        Label(self.window, text="Tag:").grid(row=6, column=0, padx=10, pady=5, sticky="w")
+        self.tagBox = ttk.Combobox(self.window, values=database.getTagName(), width=18)
+        self.tagBox.grid(row=6, column=1, padx=10, pady=5, sticky="w")
+
+        # 按鈕
+        Button(self.window, text="Submit", command=self.submit_data).grid(row=7, column=1, padx=10, pady=20, sticky="e")
+
+        self.window.mainloop()
+
+    def submit_data(self):
+        try:
+            # 獲取輸入資料
+            year = int(self.yearBox.get())
+            if not (1000 <= year <= 9999):
+                raise ValueError("Year must be a valid 4-digit number.")
+
+            month = int(self.monthBox.get())
+            if not (1 <= month <= 12):
+                raise ValueError("Month must be between 1 and 12.")
+
+            date = int(self.dateBox.get())
+            from datetime import datetime
+            datetime(year, month, date)  # 檢查日期是否有效
+
+            time = int(self.timeBox.get())
+            if not (0 <= time <= 2359):
+                raise ValueError("Time must be between 0000 and 2359.")
+
+            name = self.itemBox.get().strip()
+            if not (1 <= len(name) <= 20):
+                raise ValueError("Item name must be between 1 and 20 characters.")
+
+            price = int(self.priceBox.get())
+            if price <= 0:
+                raise ValueError("Price must be a positive number.")
+
+            # 新增資料到資料庫
+            data_id = database.insertData(year, month, date, time, name, price)
+            if data_id == 0:
+                raise Exception("Failed to add data.")
+
+            # 新增標籤
+            tag = self.tagBox.get()
+            if tag:
+                database.insertTag(data_id, tag)
+
+            messagebox.showinfo("Success", f"Data added successfully with ID: {data_id}")
+
+            # 清空輸入欄位
+            self.yearBox.delete(0, END)
+            self.monthBox.delete(0, END)
+            self.dateBox.delete(0, END)
+            self.timeBox.delete(0, END)
+            self.itemBox.delete(0, END)
+            self.priceBox.delete(0, END)
+            self.tagBox.set("")
+
+        except ValueError as e:
+            messagebox.showerror("Input Error", str(e))
+        except Exception as e:
+            messagebox.showerror("Error", f"An unexpected error occurred: {e}")
+
+# 啟動應用程式
+app = InputDataWindow()
