@@ -24,13 +24,13 @@ class InputDataWindow:
         current_year = datetime.now().year
         self.yearBox = ttk.Combobox(self.window, values=[str(year) for year in range(current_year - 20, current_year + 1)], width=10)
         self.yearBox.grid(row=0, column=1, padx=10, pady=5, sticky="w")
-        self.yearBox.bind("<<ComboboxSelected>>", self.update_dates)
+        self.yearBox.bind("<<ComboboxSelected>>", self.year_selected)
 
         # 月份選單
         Label(self.window, text="Month:").grid(row=1, column=0, padx=10, pady=5, sticky="w")
         self.monthBox = ttk.Combobox(self.window, values=[str(month) for month in range(1, 13)], width=10)
         self.monthBox.grid(row=1, column=1, padx=10, pady=5, sticky="w")
-        self.monthBox.bind("<<ComboboxSelected>>", self.update_dates)
+        self.monthBox.bind("<<ComboboxSelected>>", self.month_selected)
 
         # 日期選單
         Label(self.window, text="Date:").grid(row=2, column=0, padx=10, pady=5, sticky="w")
@@ -61,6 +61,17 @@ class InputDataWindow:
         Button(self.window, text="Submit", command=self.submit_data).grid(row=7, column=1, padx=10, pady=20, sticky="e")
 
         self.window.mainloop()
+
+    def year_selected(self, event=None):
+        """當年份選擇時清空月份和日期"""
+        self.monthBox.set("")
+        self.dateBox.set("")
+        self.dateBox["values"] = []
+
+    def month_selected(self, event=None):
+        """當月份選擇時更新日期選單"""
+        self.dateBox.set("")
+        self.update_dates()
 
     def update_dates(self, event=None):
         """更新日期選單的內容"""
