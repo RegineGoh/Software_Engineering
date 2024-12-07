@@ -3,8 +3,8 @@ from tkinter import ttk
 from database import Database
 
 database=Database()
-database.insertData(2024, 8, 30, 1222, "lunch", 130)
-database.insertTag(1,"food")
+#database.insertData(2024, 8, 30, 1222, "lunch", 130)
+#database.insertTag(1,"food")
 
 class SearchWindow:
     def __init__(self):
