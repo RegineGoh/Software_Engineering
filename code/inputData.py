@@ -1,12 +1,11 @@
-# 有GUI介面
-# 可以輸入
+# 檔案名稱: database.py
 
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
 from database import Database
 
-database = Database()
+database=Database()
 
 class InputDataWindow:
     def __init__(self):
@@ -67,9 +66,22 @@ class InputDataWindow:
             from datetime import datetime
             datetime(year, month, date)  # 檢查日期是否有效
 
-            time = int(self.timeBox.get())
-            if not (0 <= time <= 2359):
-                raise ValueError("Time must be between 0000 and 2359.")
+            time_str = self.timeBox.get().strip()  # 取得時間字串，移除多餘空白
+
+            # 驗證時間格式
+            if ":" not in time_str:
+                raise ValueError("Time format must be HH:MM.")
+
+            try:
+                # 分割為小時和分鐘
+                hours, minutes = map(int, time_str.split(":"))
+                if not (0 <= hours <= 23) or not (0 <= minutes <= 59):
+                    raise ValueError
+
+                # 將時間轉換為整數格式（如 12:20 -> 1220）
+                time_int = hours * 100 + minutes
+            except ValueError:
+                raise ValueError("Invalid time! Time must be in HH:MM format.")
 
             name = self.itemBox.get().strip()
             if not (1 <= len(name) <= 20):
@@ -80,7 +92,7 @@ class InputDataWindow:
                 raise ValueError("Price must be a positive number.")
 
             # 新增資料到資料庫
-            data_id = database.insertData(year, month, date, time, name, price)
+            data_id = database.insertData(year, month, date, time_int, name, price)
             if data_id == 0:
                 raise Exception("Failed to add data.")
 
