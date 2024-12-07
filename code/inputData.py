@@ -1,4 +1,4 @@
-# 檔案名稱: database.py
+# 檔案名稱: inputData.py
 
 from tkinter import *
 from tkinter import ttk
