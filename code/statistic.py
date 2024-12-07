@@ -2,12 +2,14 @@ from tkinter import *
 from tkinter import messagebox
 import matplotlib.pyplot as plt
 from datetime import date
+from database import Database
+
+database = Database()
 
 class StatisticWindow:
-    def __init__(self, database):
+    def __init__(self):
         self.database = database
         self.data = database.getAllData()
-        #self.tag = database.getAllTag()
         self.init_ui()
 
     def get_data_within_date_range(self, start_date, end_date):
@@ -36,28 +38,37 @@ class StatisticWindow:
             detail_window.grid_columnconfigure(col, weight=1)
 
     def show_chart(self, filtered_data):
-        # 使用 Counter 來統計每個標籤的總價格
-        tag_totals = {tag: 0 for tag in self.database.getTagName()}  # 初始化每個標籤的總價格為 0
+        # 初始化標籤的總價格
+        tag_totals = {tag: 0 for tag in self.database.getTagName()}
 
-        # 遍歷所有資料
-        for data_no in range(1, len(self.database.data_list) + 1):  # 假設資料編號從 1 開始
-            # 獲取當前資料的所有標籤
-            tags = self.database.getTagsByDataNo(data_no)
-
-            # 找到對應資料的價格
-            price = next((data["Price"] for data in self.database.data_list if data["Data_No"] == data_no), 0)
-
-            # 為每個標籤增加該資料的價格
-            for tag in tags:
-                tag_totals[tag] += price  # 累加標籤的總價格
-                
-        # 如果沒有標籤資料，顯示錯誤提示
+        # 如果沒有標籤資料，顯示提示信息
         if not tag_totals:
             messagebox.showinfo("No Tags", "No tags found for the selected data.")
             return
 
-        labels = list(tag_totals.keys())
-        sizes = list(tag_totals.values())
+        # 遍歷篩選出的資料
+        for record in filtered_data:
+            # 每筆資料的 `Data_No`（從索引 0 開始推算）
+            data_no = filtered_data.index(record) + 1
+
+            # 取得該資料的所有標籤
+            tags = self.database.getTagsByDataNo(data_no)
+
+            # 取得該資料的價格
+            price = record[-1]  # 假設價格在最後一個欄位
+
+            # 累加價格到每個標籤
+            for tag in tags:
+                if tag in tag_totals:
+                    tag_totals[tag] += price
+
+        # 如果所有標籤的價格總和為 0，則顯示提示
+        if all(value == 0 for value in tag_totals.values()):
+            messagebox.showinfo("No Data", "No data available for the selected tags.")
+            return
+                
+        labels = [tag for tag, total in tag_totals.items() if total > 0]
+        sizes = [total for total in tag_totals.values() if total > 0]
         colors = plt.cm.Paired(range(len(labels)))
 
         # 顯示圓餅圖
@@ -146,7 +157,7 @@ class StatisticWindow:
 
         window.mainloop()
 
-
+app = StatisticWindow()
 # # 測試：
 # from database import Database
 # database = Database()
