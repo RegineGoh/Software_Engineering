@@ -156,8 +156,9 @@ class StatisticWindow:
         search_btn.grid(row=8, column=0, columnspan=2, pady=10)
 
         window.mainloop()
-
-app = StatisticWindow()
+        
+if __name__ == "__main__":
+    app = StatisticWindow()
 # # 測試：
 # from database import Database
 # database = Database()

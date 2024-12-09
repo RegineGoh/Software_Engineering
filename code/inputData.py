@@ -155,4 +155,5 @@ class InputDataWindow:
             messagebox.showerror("Error", f"An unexpected error occurred: {e}")
 
 # 啟動應用程式
-app = InputDataWindow()
+if __name__ == "__main__":
+    app = InputDataWindow()

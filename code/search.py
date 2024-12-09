@@ -139,5 +139,6 @@ class SearchWindow:
         btn.grid(row=6, column=2, padx=10, pady=5, sticky="e")
 
         window.mainloop()
-
-app = SearchWindow()
+        
+if __name__ == "__main__":
+    app = SearchWindow()

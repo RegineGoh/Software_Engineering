@@ -1,7 +1,19 @@
+import os
+import sys
 import subprocess
 from tkinter import *
 from tkinter import messagebox
 
+# 處理打包後的資源檔案路徑
+def resource_path(relative_path):
+    """取得 PyInstaller 打包後的資源檔案路徑"""
+    try:
+        # PyInstaller 打包後會將檔案放在 _MEIPASS 資料夾中
+        base_path = sys._MEIPASS
+    except Exception:
+        # 未打包時，使用當前目錄
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
 
 class Homepage:
     def __init__(self):
@@ -30,13 +42,13 @@ class Homepage:
 
     # 點擊按鈕後執行其他 Python 檔案
     def open_input_data(self):
-        subprocess.Popen(["python", "inputData.py"])  # 請確保檔案名稱正確且與此檔案同目錄
+        subprocess.Popen(["python", resource_path('inputData.py')])  # 使用資源路徑
 
     def open_search(self):
-        subprocess.Popen(["python", "search.py"])
+        subprocess.Popen(["python", resource_path('search.py')])
 
     def open_statistics(self):
-        subprocess.Popen(["python", "statistic.py"])
+        subprocess.Popen(["python", resource_path('statistic.py')])
 
 
 # 啟動應用程式
