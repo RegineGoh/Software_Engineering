@@ -1,7 +1,11 @@
 from tkinter import *
+from tkinter import ttk
 from tkinter import messagebox
+import matplotlib
 import matplotlib.pyplot as plt
-from datetime import date
+import os
+import sys
+from datetime import datetime
 from database import Database
 
 database = Database()
@@ -13,7 +17,7 @@ class StatisticWindow:
         self.init_ui()
 
     def get_data_within_date_range(self, start_date, end_date):
-        return [row for row in self.data if start_date <= date(row[0], row[1], row[2]) <= end_date]
+        return [row for row in self.data if start_date <= datetime(row[0], row[1], row[2]) <= end_date]
 
     def show_detail(self, filtered_data):
         detail_window = Toplevel()
@@ -81,25 +85,25 @@ class StatisticWindow:
     def search(self):
         # 取得開始日期
         try:
-            start_year = int(self.start_year.get())
-            start_month = int(self.start_month.get())
-            start_day = int(self.start_day.get())
-            start_date = date(start_year, start_month, start_day)
+            start_year = int(self.start_yearBox.get())
+            start_month = int(self.start_monthBox.get())
+            start_day = int(self.start_dateBox.get())
+            start_date = datetime(start_year, start_month, start_day)
         except ValueError:
             # 當日期格式錯誤時，設置為最早的日期
             messagebox.showerror("Input Error", "Invalid start date. Setting to the earliest available date.")
-            start_date = min(date(row[0], row[1], row[2]) for row in self.data)  # 設定最早的日期
+            start_date = min(datetime(row[0], row[1], row[2]) for row in self.data)  # 設定最早的日期
 
         # 取得結束日期
         try:
-            end_year = int(self.end_year.get())
-            end_month = int(self.end_month.get())
-            end_day = int(self.end_day.get())
-            end_date = date(end_year, end_month, end_day)
+            end_year = int(self.end_yearBox.get())
+            end_month = int(self.end_monthBox.get())
+            end_day = int(self.end_dateBox.get())
+            end_date = datetime(end_year, end_month, end_day)
         except ValueError:
             # 當日期格式錯誤時，設置為最晚的日期
             messagebox.showerror("Input Error", "Invalid end date. Setting to the latest available date.")
-            end_date = max(date(row[0], row[1], row[2]) for row in self.data)  # 設定最晚的日期
+            end_date = max(datetime(row[0], row[1], row[2]) for row in self.data)  # 設定最晚的日期
 
         # 篩選資料
         filtered_data = self.get_data_within_date_range(start_date, end_date)
@@ -119,30 +123,47 @@ class StatisticWindow:
         window.title("Statistic Search")
         # window.geometry("600x400")  # 設定視窗大小為 600x400
 
-        Label(window, text="Start Date:").grid(row=0, column=0, padx=10, pady=5, sticky="w")
-        Label(window, text="Year:").grid(row=0, column=1, padx=10, pady=5, sticky="w")
-        Label(window, text="Month:").grid(row=1, column=1, padx=10, pady=5, sticky="w")
-        Label(window, text="Date:").grid(row=2, column=1, padx=10, pady=5, sticky="w")
+        Label(window, text="Start Date:").grid(row=0, column=0, padx=5, pady=5, sticky="w")
+        
+        # 開始年份選單
+        current_year = datetime.now().year
+        Label(window, text="Year:").grid(row=0, column=1, padx=5, pady=5, sticky="w")
+        self.start_yearBox = ttk.Combobox(window, values=[str(year) for year in range(current_year - 20, current_year + 1)], width=10)
+        self.start_yearBox.grid(row=0, column=2, padx=5, pady=5, sticky="w")
+        self.start_yearBox.bind("<<ComboboxSelected>>", self.start_year_selected)
 
-        self.start_year = Entry(window, width=5)
-        self.start_year.grid(row=0, column=2, padx=10, pady=5, sticky="w")
-        self.start_month = Entry(window, width=5)
-        self.start_month.grid(row=1, column=2, padx=10, pady=5, sticky="w")
-        self.start_day = Entry(window, width=5)
-        self.start_day.grid(row=2, column=2, padx=10, pady=5, sticky="w")
+        # 開始月份選單
+        Label(window, text="Month:").grid(row=1, column=1, padx=5, pady=5, sticky="w")
+        self.start_monthBox = ttk.Combobox(window, values=[str(month) for month in range(1, 13)], width=5)
+        self.start_monthBox.grid(row=1, column=2, padx=5, pady=5, sticky="w")
+        self.start_monthBox.bind("<<ComboboxSelected>>", self.start_month_selected)
+
+        # 開始日期選單
+        Label(window, text="Date:").grid(row=2, column=1, padx=5, pady=5, sticky="w")
+        self.start_dateBox = ttk.Combobox(window, width=5)
+        self.start_dateBox.grid(row=2, column=2, padx=5, pady=5, sticky="w")
 
         # 設定結束日期輸入
-        Label(window, text="End Date:").grid(row=3, column=0, padx=10, pady=5, sticky="w")
-        Label(window, text="Year:").grid(row=3, column=1, padx=10, pady=5, sticky="w")
-        Label(window, text="Month:").grid(row=4, column=1, padx=10, pady=5, sticky="w")
-        Label(window, text="Day:").grid(row=5, column=1, padx=10, pady=5, sticky="w")
+        Label(window, text="End Date:").grid(row=3, column=0, padx=5, pady=5, sticky="w")
 
-        self.end_year = Entry(window, width=5)
-        self.end_year.grid(row=3, column=2, padx=10, pady=5, sticky="w")
-        self.end_month = Entry(window, width=5)
-        self.end_month.grid(row=4, column=2, padx=10, pady=5, sticky="w")
-        self.end_day = Entry(window, width=5)
-        self.end_day.grid(row=5, column=2, padx=10, pady=5, sticky="w")
+        # 結束年份選單
+        current_year = datetime.now().year
+        Label(window, text="Year:").grid(row=3, column=1, padx=5, pady=5, sticky="w")
+        self.end_yearBox = ttk.Combobox(window, values=[str(year) for year in range(current_year - 20, current_year + 1)], width=10)
+        self.end_yearBox.grid(row=3, column=2, padx=5, pady=5, sticky="w")
+        self.end_yearBox.bind("<<ComboboxSelected>>", self.end_year_selected)
+
+        # 結束月份選單
+        Label(window, text="Month:").grid(row=4, column=1, padx=5, pady=5, sticky="w")
+        self.end_monthBox = ttk.Combobox(window, values=[str(month) for month in range(1, 13)], width=5)
+        self.end_monthBox.grid(row=4, column=2, padx=5, pady=5, sticky="w")
+        self.end_monthBox.bind("<<ComboboxSelected>>", self.end_month_selected)
+
+        # 結束日期選單
+        Label(window, text="Date:").grid(row=5, column=1, padx=5, pady=5, sticky="w")
+        self.end_dateBox = ttk.Combobox(window, width=5)
+        self.end_dateBox.grid(row=5, column=2, padx=5, pady=5, sticky="w")
+
 
         # 勾選框：顯示細節與圖表
         self.detail_var = BooleanVar()
@@ -156,9 +177,77 @@ class StatisticWindow:
         search_btn.grid(row=8, column=0, columnspan=2, pady=10)
 
         window.mainloop()
-        
-if __name__ == "__main__":
-    app = StatisticWindow()
+
+    def start_year_selected(self, event=None):
+        """當年份選擇時清空月份和日期"""
+        self.start_monthBox.set("")
+        self.start_dateBox.set("")
+        self.start_dateBox["values"] = []
+
+    def start_month_selected(self, event=None):
+        """當月份選擇時更新日期選單"""
+        self.start_dateBox.set("")
+        self.update_start_dates()
+
+    def update_start_dates(self, event=None):
+        try:
+            year = int(self.start_yearBox.get())
+            month = int(self.start_monthBox.get())
+        except ValueError:
+            # 若年份或月份未選擇，清空日期選單
+            self.start_dateBox["values"] = []
+            return
+
+        # 計算該月的天數
+        if month in [1, 3, 5, 7, 8, 10, 12]:
+            days = 31
+        elif month in [4, 6, 9, 11]:
+            days = 30
+        elif month == 2:
+            # 閏年判斷
+            days = 29 if (year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)) else 28
+        else:
+            days = 0
+
+        # 更新日期選單
+        self.start_dateBox["values"] = [str(day) for day in range(1, days + 1)]
+
+    def end_year_selected(self, event=None):
+        """當年份選擇時清空月份和日期"""
+        self.end_monthBox.set("")
+        self.end_dateBox.set("")
+        self.end_dateBox["values"] = []
+
+    def end_month_selected(self, event=None):
+        """當月份選擇時更新日期選單"""
+        self.end_dateBox.set("")
+        self.update_end_dates()
+
+    def update_end_dates(self, event=None):
+        try:
+            year = int(self.end_yearBox.get())
+            month = int(self.end_monthBox.get())
+        except ValueError:
+            # 若年份或月份未選擇，清空日期選單
+            self.end_dateBox["values"] = []
+            return
+
+        # 計算該月的天數
+        if month in [1, 3, 5, 7, 8, 10, 12]:
+            days = 31
+        elif month in [4, 6, 9, 11]:
+            days = 30
+        elif month == 2:
+            # 閏年判斷
+            days = 29 if (year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)) else 28
+        else:
+            days = 0
+
+        # 更新日期選單
+        self.end_dateBox["values"] = [str(day) for day in range(1, days + 1)]
+
+app = StatisticWindow()
+
 # # 測試：
 # from database import Database
 # database = Database()

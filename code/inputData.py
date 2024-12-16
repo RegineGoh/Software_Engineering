@@ -1,5 +1,5 @@
 # 檔案名稱: inputData.py
-#從由使用者輸入改使用下拉式選單（年月日） -> 防呆
+# 從由使用者輸入改使用下拉式選單（年月日） -> 防呆
 
 from tkinter import *
 from tkinter import ttk
@@ -155,5 +155,4 @@ class InputDataWindow:
             messagebox.showerror("Error", f"An unexpected error occurred: {e}")
 
 # 啟動應用程式
-if __name__ == "__main__":
-    app = InputDataWindow()
+app = InputDataWindow()
