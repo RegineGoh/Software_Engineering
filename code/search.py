@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 from database import Database
+from datetime import datetime
 
 database=Database()
 #database.insertData(2024, 8, 30, 1222, "lunch", 130)
@@ -17,7 +18,6 @@ class SearchWindow:
         self.max = -1
         self.data = database.getAllData()
         self.init_ui()
-
 
     def get_years(self):
         years = set(row[0] for row in self.data)
@@ -113,16 +113,34 @@ class SearchWindow:
         Label(window, text="Year:").grid(row=0, column=1, padx=10, pady=5, sticky="w")
         Label(window, text="Month:").grid(row=1, column=1, padx=10, pady=5, sticky="w")
         Label(window, text="Date:").grid(row=2, column=1, padx=10, pady=5, sticky="w")
-
-        self.yearBox = ttk.Combobox(window, values=self.get_years(), width=5)
+        
+        # 年份選單
+        current_year = datetime.now().year
+        Label(window, text="Year:").grid(row=0, column=1, padx=10, pady=5, sticky="w")
+        self.yearBox = ttk.Combobox(window, values=[str(year) for year in range(current_year - 20, current_year + 1)], width=10)
         self.yearBox.grid(row=0, column=2, padx=10, pady=5, sticky="w")
+        self.yearBox.bind("<<ComboboxSelected>>", self.year_selected)
 
-        self.monthBox = Entry(window, width=3)
+        # 月份選單
+        Label(window, text="Month:").grid(row=1, column=1, padx=10, pady=5, sticky="w")
+        self.monthBox = ttk.Combobox(window, values=[str(month) for month in range(1, 13)], width=5)
         self.monthBox.grid(row=1, column=2, padx=10, pady=5, sticky="w")
+        self.monthBox.bind("<<ComboboxSelected>>", self.month_selected)
 
-        self.dateBox = Entry(window, width=3)
+        # 日期選單
+        Label(window, text="Date:").grid(row=2, column=1, padx=10, pady=5, sticky="w")
+        self.dateBox = ttk.Combobox(window, width=5)
         self.dateBox.grid(row=2, column=2, padx=10, pady=5, sticky="w")
 
+        # self.yearBox = ttk.Combobox(window, values=self.get_years(), width=5)
+        # self.yearBox.grid(row=0, column=2, padx=10, pady=5, sticky="w")
+        
+        # self.monthBox = Entry(window, width=3)
+        # self.monthBox.grid(row=1, column=2, padx=10, pady=5, sticky="w")
+
+        # self.dateBox = Entry(window, width=3)
+        # self.dateBox.grid(row=2, column=2, padx=10, pady=5, sticky="w")
+        
         self.tagBox = ttk.Combobox(window, values=self.tag, width=8)
         self.tagBox.grid(row=3, column=2, padx=10, pady=5, sticky="w")
 
@@ -139,6 +157,40 @@ class SearchWindow:
         btn.grid(row=6, column=2, padx=10, pady=5, sticky="e")
 
         window.mainloop()
+
+    def year_selected(self, event=None):
+        """當年份選擇時清空月份和日期"""
+        self.monthBox.set("")
+        self.dateBox.set("")
+        self.dateBox["values"] = []
+
+    def month_selected(self, event=None):
+        """當月份選擇時更新日期選單"""
+        self.dateBox.set("")
+        self.update_dates()
+
+    def update_dates(self, event=None):
+        """更新日期選單的內容"""
+        try:
+            year = int(self.yearBox.get())
+            month = int(self.monthBox.get())
+        except ValueError:
+            # 若年份或月份未選擇，清空日期選單
+            self.dateBox["values"] = []
+            return
+
+        # 計算該月的天數
+        if month in [1, 3, 5, 7, 8, 10, 12]:
+            days = 31
+        elif month in [4, 6, 9, 11]:
+            days = 30
+        elif month == 2:
+            # 閏年判斷
+            days = 29 if (year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)) else 28
+        else:
+            days = 0
+
+        # 更新日期選單
+        self.dateBox["values"] = [str(day) for day in range(1, days + 1)]
         
-if __name__ == "__main__":
-    app = SearchWindow()
+app = SearchWindow()
