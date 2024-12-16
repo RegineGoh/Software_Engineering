@@ -82,7 +82,7 @@ class StatisticWindow:
         plt.axis('equal')  # 圓形比例
         plt.show()
 
-    def search(self):
+    # def search(self):
         # 取得開始日期
         try:
             start_year = int(self.start_yearBox.get())
@@ -118,7 +118,93 @@ class StatisticWindow:
         if self.chart_var.get():
             self.show_chart(filtered_data)
 
+    def search(self):
+        start_date = self.get_date_from_input(self.start_yearBox, self.start_monthBox, self.start_dateBox, "start")
+        end_date = self.get_date_from_input(self.end_yearBox, self.end_monthBox, self.end_dateBox, "end")
+
+        filtered_data = self.get_data_within_date_range(start_date, end_date)
+
+        if len(filtered_data) == 0:
+            messagebox.showinfo("No Data", "No data found for the given date range.")
+            return
+
+        if self.detail_var.get():
+            self.show_detail(filtered_data)
+
+        if self.chart_var.get():
+            self.show_chart(filtered_data)
+
+    def get_date_from_input(self, year_box, month_box, date_box, date_type):
+        try:
+            year = int(year_box.get())
+            month = int(month_box.get())
+            day = int(date_box.get())
+            return datetime(year, month, day)
+        except ValueError:
+            messagebox.showerror(f"{date_type.capitalize()} Date Error", f"Invalid {date_type} date. Setting to the earliest/latest available date.")
+            default_date = min(datetime(row[0], row[1], row[2]) for row in self.data) if date_type == "start" else max(datetime(row[0], row[1], row[2]) for row in self.data)
+            return default_date
+
+    def update_dates(self, year_box, month_box, date_box, is_start=True):
+        try:
+            year = int(year_box.get())
+            month = int(month_box.get())
+        except ValueError:
+            date_box["values"] = []
+            return
+
+        days = self.get_days_in_month(year, month)
+        date_box["values"] = [str(day) for day in range(1, days + 1)]
+
+    def get_days_in_month(self, year, month):
+        if month in [1, 3, 5, 7, 8, 10, 12]:
+            return 31
+        elif month in [4, 6, 9, 11]:
+            return 30
+        elif month == 2:
+            return 29 if (year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)) else 28
+        return 0
+
+    def create_date_input(self, window, prefix, start_row, start_col):
+        current_year = datetime.now().year
+        Label(window, text=f"{prefix} Date:").grid(row=start_row, column=0, padx=5, pady=5, sticky="w")
+
+        Label(window, text="Year:").grid(row=start_row, column=start_col, padx=5, pady=5, sticky="w")
+        year_box = ttk.Combobox(window, values=[str(year) for year in range(current_year - 20, current_year + 1)], width=10)
+        year_box.grid(row=start_row, column=start_col + 1, padx=5, pady=5, sticky="w")
+
+        Label(window, text="Month:").grid(row=start_row + 1, column=start_col, padx=5, pady=5, sticky="w")
+        month_box = ttk.Combobox(window, values=[str(month) for month in range(1, 13)], width=5)
+        month_box.grid(row=start_row + 1, column=start_col + 1, padx=5, pady=5, sticky="w")
+
+        Label(window, text="Date:").grid(row=start_row + 2, column=start_col, padx=5, pady=5, sticky="w")
+        date_box = ttk.Combobox(window, width=5)
+        date_box.grid(row=start_row + 2, column=start_col + 1, padx=5, pady=5, sticky="w")
+
+        year_box.bind("<<ComboboxSelected>>", lambda e: self.update_dates(year_box, month_box, date_box, True))
+        month_box.bind("<<ComboboxSelected>>", lambda e: self.update_dates(year_box, month_box, date_box, True))
+
+        return year_box, month_box, date_box
+
     def init_ui(self):
+        window = Tk()
+        window.title("Statistic Search")
+
+        self.start_yearBox, self.start_monthBox, self.start_dateBox = self.create_date_input(window, "Start", 0, 1)
+        self.end_yearBox, self.end_monthBox, self.end_dateBox = self.create_date_input(window, "End", 3, 1)
+
+        self.detail_var = BooleanVar()
+        self.chart_var = BooleanVar()
+
+        Checkbutton(window, text="Show Detail", variable=self.detail_var).grid(row=6, column=0, padx=10, pady=5, sticky="w")
+        Checkbutton(window, text="Show Chart", variable=self.chart_var).grid(row=7, column=0, padx=10, pady=5, sticky="w")
+
+        search_btn = Button(window, text="Get statistic", command=self.search)
+        search_btn.grid(row=8, column=0, columnspan=2, pady=10)
+
+        window.mainloop()
+
+    # def init_ui(self):
         window = Tk()
         window.title("Statistic Search")
         # window.geometry("600x400")  # 設定視窗大小為 600x400
@@ -178,52 +264,52 @@ class StatisticWindow:
 
         window.mainloop()
 
-    def start_year_selected(self, event=None):
-        """當年份選擇時清空月份和日期"""
-        self.start_monthBox.set("")
-        self.start_dateBox.set("")
-        self.start_dateBox["values"] = []
+    # def start_year_selected(self, event=None):
+    #     """當年份選擇時清空月份和日期"""
+    #     self.start_monthBox.set("")
+    #     self.start_dateBox.set("")
+    #     self.start_dateBox["values"] = []
 
-    def start_month_selected(self, event=None):
-        """當月份選擇時更新日期選單"""
-        self.start_dateBox.set("")
-        self.update_start_dates()
+    # def start_month_selected(self, event=None):
+    #     """當月份選擇時更新日期選單"""
+    #     self.start_dateBox.set("")
+    #     self.update_start_dates()
 
-    def update_start_dates(self, event=None):
-        try:
-            year = int(self.start_yearBox.get())
-            month = int(self.start_monthBox.get())
-        except ValueError:
-            # 若年份或月份未選擇，清空日期選單
-            self.start_dateBox["values"] = []
-            return
+    # def update_start_dates(self, event=None):
+    #     try:
+    #         year = int(self.start_yearBox.get())
+    #         month = int(self.start_monthBox.get())
+    #     except ValueError:
+    #         # 若年份或月份未選擇，清空日期選單
+    #         self.start_dateBox["values"] = []
+    #         return
 
-        # 計算該月的天數
-        if month in [1, 3, 5, 7, 8, 10, 12]:
-            days = 31
-        elif month in [4, 6, 9, 11]:
-            days = 30
-        elif month == 2:
-            # 閏年判斷
-            days = 29 if (year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)) else 28
-        else:
-            days = 0
+    #     # 計算該月的天數
+    #     if month in [1, 3, 5, 7, 8, 10, 12]:
+    #         days = 31
+    #     elif month in [4, 6, 9, 11]:
+    #         days = 30
+    #     elif month == 2:
+    #         # 閏年判斷
+    #         days = 29 if (year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)) else 28
+    #     else:
+    #         days = 0
 
-        # 更新日期選單
-        self.start_dateBox["values"] = [str(day) for day in range(1, days + 1)]
+    #     # 更新日期選單
+    #     self.start_dateBox["values"] = [str(day) for day in range(1, days + 1)]
 
-    def end_year_selected(self, event=None):
-        """當年份選擇時清空月份和日期"""
-        self.end_monthBox.set("")
-        self.end_dateBox.set("")
-        self.end_dateBox["values"] = []
+    # def end_year_selected(self, event=None):
+    #     """當年份選擇時清空月份和日期"""
+    #     self.end_monthBox.set("")
+    #     self.end_dateBox.set("")
+    #     self.end_dateBox["values"] = []
 
-    def end_month_selected(self, event=None):
-        """當月份選擇時更新日期選單"""
-        self.end_dateBox.set("")
-        self.update_end_dates()
+    # def end_month_selected(self, event=None):
+    #     """當月份選擇時更新日期選單"""
+    #     self.end_dateBox.set("")
+    #     self.update_end_dates()
 
-    def update_end_dates(self, event=None):
+    # def update_end_dates(self, event=None):
         try:
             year = int(self.end_yearBox.get())
             month = int(self.end_monthBox.get())
@@ -245,6 +331,41 @@ class StatisticWindow:
 
         # 更新日期選單
         self.end_dateBox["values"] = [str(day) for day in range(1, days + 1)]
+
+    # def start_year_selected(self, event=None):
+    #     """當年份選擇時清空月份和日期"""
+    #     self.start_monthBox.set("")
+    #     self.start_dateBox.set("")
+    #     self.start_dateBox["values"] = []
+
+    # def start_month_selected(self, dateBox, event=None):
+    #     """當月份選擇時更新日期選單"""
+    #     self.start_dateBox.set("")
+    #     self.update_start_dates()
+
+    #     def update_start_dates(self, event=None):
+    #     try:
+    #         year = int(self.start_yearBox.get())
+    #         month = int(self.start_monthBox.get())
+    #     except ValueError:
+    #         # 若年份或月份未選擇，清空日期選單
+    #         self.start_dateBox["values"] = []
+    #         return
+
+    #     # 計算該月的天數
+    #     if month in [1, 3, 5, 7, 8, 10, 12]:
+    #         days = 31
+    #     elif month in [4, 6, 9, 11]:
+    #         days = 30
+    #     elif month == 2:
+    #         # 閏年判斷
+    #         days = 29 if (year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)) else 28
+    #     else:
+    #         days = 0
+
+    #     # 更新日期選單
+    #     self.start_dateBox["values"] = [str(day) for day in range(1, days + 1)]
+
 
 app = StatisticWindow()
 
